@@ -11,8 +11,15 @@
 using namespace std;
 
 int main(void) {
-	WSADATA wsaData;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	WSADATA data;
+	int err;
+
+	err = WSAStartup(MAKEWORD(2, 2), &data);
+
+	if (err != 0) {
+		cout << "WSAStartup failed with error: " << err << endl;
+		return 1;
+	}
 
 	SOCKET sock;
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -25,6 +32,7 @@ int main(void) {
 	connect(sock, (SOCKADDR*)&addr, sizeof(addr));
 
 	char msg[] = "Client send";
+	
 	send(sock, msg, strlen(msg), 0);
 
 	char client_buffer[PACKET_SIZE] = {};
