@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="nerdMain.cpp">
+    <ClCompile Include="client_temp.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

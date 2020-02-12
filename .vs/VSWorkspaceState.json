@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
+    "\\chat_socket",
+    "\\test4",
     "\\test4\\test4"
   ],
-  "SelectedNode": "\\Algorithm",
+  "SelectedNode": "\\chat_socket",
   "PreviewInSolutionExplorer": false
 }
