@@ -1,3 +1,5 @@
+#include "../ChatServer/ServerForm.h"
+#include <iostream>
 #pragma once
 
 namespace ChatMain {
@@ -8,6 +10,9 @@ namespace ChatMain {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::IO;
+
+	using namespace OpenCvSharp;
 
 	/// <summary>
 	/// RegisterForm에 대한 요약입니다.
@@ -34,12 +39,17 @@ namespace ChatMain {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::Button^ btnName;
+	private: System::Windows::Forms::Button^ btnSave;
+	protected:
+
 	protected:
 	private: System::Windows::Forms::Label^ lblName;
 	private: System::Windows::Forms::TextBox^ txtName;
-	private: System::Windows::Forms::Button^ btnCapture;
-	private: System::Windows::Forms::PictureBox^ boxPhoto;
+
+	private: OpenCvSharp::UserInterface::PictureBoxIpl^ picPhoto;
+	private: System::Windows::Forms::Timer^ timer1;
+	private: System::ComponentModel::IContainer^ components;
+
 
 	protected:
 
@@ -51,7 +61,7 @@ namespace ChatMain {
 		/// <summary>
 		/// 필수 디자이너 변수입니다.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -60,22 +70,24 @@ namespace ChatMain {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->btnName = (gcnew System::Windows::Forms::Button());
+			this->components = (gcnew System::ComponentModel::Container());
+			this->btnSave = (gcnew System::Windows::Forms::Button());
 			this->lblName = (gcnew System::Windows::Forms::Label());
 			this->txtName = (gcnew System::Windows::Forms::TextBox());
-			this->btnCapture = (gcnew System::Windows::Forms::Button());
-			this->boxPhoto = (gcnew System::Windows::Forms::PictureBox());
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->boxPhoto))->BeginInit();
+			this->picPhoto = (gcnew OpenCvSharp::UserInterface::PictureBoxIpl());
+			this->timer1 = (gcnew System::Windows::Forms::Timer(this->components));
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->picPhoto))->BeginInit();
 			this->SuspendLayout();
 			// 
-			// btnName
+			// btnSave
 			// 
-			this->btnName->Location = System::Drawing::Point(395, 273);
-			this->btnName->Name = L"btnName";
-			this->btnName->Size = System::Drawing::Size(75, 23);
-			this->btnName->TabIndex = 9;
-			this->btnName->Text = L"저장";
-			this->btnName->UseVisualStyleBackColor = true;
+			this->btnSave->Location = System::Drawing::Point(322, 274);
+			this->btnSave->Name = L"btnSave";
+			this->btnSave->Size = System::Drawing::Size(75, 23);
+			this->btnSave->TabIndex = 9;
+			this->btnSave->Text = L"저장";
+			this->btnSave->UseVisualStyleBackColor = true;
+			this->btnSave->Click += gcnew System::EventHandler(this, &RegisterForm::btnSave_Click);
 			// 
 			// lblName
 			// 
@@ -88,45 +100,82 @@ namespace ChatMain {
 			// 
 			// txtName
 			// 
-			this->txtName->Location = System::Drawing::Point(55, 277);
+			this->txtName->Location = System::Drawing::Point(55, 274);
 			this->txtName->Name = L"txtName";
-			this->txtName->Size = System::Drawing::Size(153, 25);
+			this->txtName->Size = System::Drawing::Size(168, 25);
 			this->txtName->TabIndex = 7;
 			// 
-			// btnCapture
+			// picPhoto
 			// 
-			this->btnCapture->Location = System::Drawing::Point(395, 105);
-			this->btnCapture->Name = L"btnCapture";
-			this->btnCapture->Size = System::Drawing::Size(75, 23);
-			this->btnCapture->TabIndex = 6;
-			this->btnCapture->Text = L"캡쳐";
-			this->btnCapture->UseVisualStyleBackColor = true;
+			this->picPhoto->Location = System::Drawing::Point(15, 12);
+			this->picPhoto->Name = L"picPhoto";
+			this->picPhoto->Size = System::Drawing::Size(450, 240);
+			this->picPhoto->TabIndex = 10;
+			this->picPhoto->TabStop = false;
 			// 
-			// boxPhoto
+			// timer1
 			// 
-			this->boxPhoto->Location = System::Drawing::Point(12, 11);
-			this->boxPhoto->Name = L"boxPhoto";
-			this->boxPhoto->Size = System::Drawing::Size(377, 240);
-			this->boxPhoto->TabIndex = 5;
-			this->boxPhoto->TabStop = false;
+			this->timer1->Enabled = true;
+			this->timer1->Interval = 33;
+			this->timer1->Tick += gcnew System::EventHandler(this, &RegisterForm::timer1_Tick);
 			// 
 			// RegisterForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(482, 313);
-			this->Controls->Add(this->btnName);
+			this->Controls->Add(this->picPhoto);
+			this->Controls->Add(this->btnSave);
 			this->Controls->Add(this->lblName);
 			this->Controls->Add(this->txtName);
-			this->Controls->Add(this->btnCapture);
-			this->Controls->Add(this->boxPhoto);
 			this->Name = L"RegisterForm";
 			this->Text = L"RegisterForm";
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->boxPhoto))->EndInit();
+			this->Load += gcnew System::EventHandler(this, &RegisterForm::RegisterForm_Load);
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->picPhoto))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
 #pragma endregion
-	};
+
+		CvCapture^ capture;
+		IplImage^ src;
+
+	private: System::Void RegisterForm_Load(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			capture = CvCapture::FromCamera(CaptureDevice::DShow, 0);
+			capture->SetCaptureProperty(CaptureProperty::FrameWidth, 450);
+			capture->SetCaptureProperty(CaptureProperty::FrameHeight, 240);
+		}
+		catch (Exception ^ ex) {
+			timer1->Enabled = false;
+		}
+	}
+	private: System::Void timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			src = capture->QueryFrame();
+			picPhoto->ImageIpl = src;
+		}
+		catch (Exception ^ ex) {}
+	}
+
+	private: System::Void btnSave_Click(System::Object^ sender, System::EventArgs^ e) {
+		try {
+			String^ dir = "../ChatServer/Photo";
+			DirectoryInfo^ di = gcnew DirectoryInfo(dir);
+
+			if (String::IsNullOrWhiteSpace(txtName->Text)) {
+				MessageBox::Show("이름을 입력해주세요");
+			}
+			else {
+				if (di->Exists == false) {
+					di->Create();
+				}
+				Cv::SaveImage("../ChatServer/Photo/" + txtName->Text + ".jpg", src);
+				MessageBox::Show("회원가입 완료!");
+			}
+		}
+		catch (Exception ^ ex) {}
+	}
+};
 }

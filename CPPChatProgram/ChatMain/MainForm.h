@@ -11,6 +11,9 @@ namespace ChatMain {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
+	using namespace OpenCvSharp;
+	using namespace OpenCvSharp::CPlusPlus;
+
 	/// <summary>
 	/// MainForm에 대한 요약입니다.
 	/// </summary>

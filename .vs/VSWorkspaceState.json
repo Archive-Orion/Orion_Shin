@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\chat_socket",
-    "\\chat_socket\\server"
+    "\\CPPChatProgram"
   ],
-  "SelectedNode": "\\chat_socket\\server\\server_temp.cpp",
+  "SelectedNode": "\\CPPChatProgram\\CPPChatProgram.sln",
   "PreviewInSolutionExplorer": false
 }

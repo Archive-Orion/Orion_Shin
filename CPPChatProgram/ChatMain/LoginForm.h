@@ -11,7 +11,6 @@ namespace ChatMain {
 	using namespace System::Drawing;
 
 	using namespace OpenCvSharp;
-	using namespace OpenCvSharp::CPlusPlus;
 
 	/// <summary>
 	/// LoginForm에 대한 요약입니다.
@@ -72,7 +71,7 @@ namespace ChatMain {
 			// 
 			// btnCapture
 			// 
-			this->btnCapture->Location = System::Drawing::Point(658, 258);
+			this->btnCapture->Location = System::Drawing::Point(203, 278);
 			this->btnCapture->Name = L"btnCapture";
 			this->btnCapture->Size = System::Drawing::Size(75, 23);
 			this->btnCapture->TabIndex = 1;
@@ -90,7 +89,7 @@ namespace ChatMain {
 			// 
 			this->picLogin->Location = System::Drawing::Point(12, 12);
 			this->picLogin->Name = L"picLogin";
-			this->picLogin->Size = System::Drawing::Size(640, 480);
+			this->picLogin->Size = System::Drawing::Size(450, 240);
 			this->picLogin->TabIndex = 2;
 			this->picLogin->TabStop = false;
 			// 
@@ -98,7 +97,7 @@ namespace ChatMain {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 15);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(742, 503);
+			this->ClientSize = System::Drawing::Size(482, 313);
 			this->Controls->Add(this->picLogin);
 			this->Controls->Add(this->btnCapture);
 			this->Name = L"LoginForm";
@@ -111,30 +110,41 @@ namespace ChatMain {
 		}
 #pragma endregion
 
-		VideoCapture^ video;
-		Mat^ frame = gcnew Mat();
+		CvCapture^ capture;
+		IplImage^ src;
 
 	private: System::Void btnCapture_Click(System::Object^ sender, System::EventArgs^ e) {
-		this->Hide();
-		ChatClient::ClientForm^ Cform = gcnew ChatClient::ClientForm();
-		Cform->Show();
+		if (true) {
+			this->Hide();
+			ChatClient::ClientForm^ Cform = gcnew ChatClient::ClientForm();
+			Cform->Show();
+		}
+		else {
+			MessageBox::Show("로그인 실패!");
+		}
 	}
 	private: System::Void LoginForm_Load(System::Object^ sender, System::EventArgs^ e) {
 		try {
-			video = gcnew VideoCapture(0);
-			video->FrameWidth = 640;
-			video->FrameHeight = 480;
+			capture = CvCapture::FromCamera(CaptureDevice::DShow, 0);
+			capture->SetCaptureProperty(CaptureProperty::FrameWidth, 450);
+			capture->SetCaptureProperty(CaptureProperty::FrameHeight, 240);
 		}
 		catch(Exception^ ex) {
 			timer1->Enabled = false;
 		}
 	}
 	private: System::Void timer1_Tick(System::Object^ sender, System::EventArgs^ e) {
-		video->Read(frame);
-		picLogin->ImageIpl = frame->ToIplImage(true);
+		try {
+			src = capture->QueryFrame();
+			picLogin->ImageIpl = src;
+		}
+		catch(Exception^ ex){}
 	}
 	private: System::Void LoginForm_FormClosing(System::Object^ sender, System::Windows::Forms::FormClosingEventArgs^ e) {
-		//frame->Dispose();
+		try {
+			Cv::ReleaseImage(src);
+		}
+		catch(Exception^ ex) {}
 	}
 };
 }
